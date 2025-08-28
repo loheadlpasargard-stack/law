@@ -1,0 +1,44 @@
+name: Q&A Bot (Labor Law)
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  answer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          pip install python-docx rapidfuzz
+
+      - name: Run bot
+        shell: bash
+        run: |
+          python .github/bot/answer.py "${{ github.event.issue.title }} \n\n ${{
+            github.event.issue.body }}" > reply.md
+
+      - name: Comment back
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('reply.md','utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body
+            });
