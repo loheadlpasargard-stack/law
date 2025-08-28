@@ -25,10 +25,8 @@ jobs:
           pip install python-docx rapidfuzz
 
       - name: Run bot
-        shell: bash
         run: |
-          python .github/bot/answer.py "${{ github.event.issue.title }} \n\n ${{
-            github.event.issue.body }}" > reply.md
+          python .github/bot/answer.py "${{ github.event.issue.title }} ${{ github.event.issue.body }}" > reply.md
 
       - name: Comment back
         uses: actions/github-script@v7
